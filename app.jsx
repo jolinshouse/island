@@ -125,7 +125,11 @@ function IslandApp() {
     return () => window.removeEventListener("keydown", onKey);
   }, [onAction]);
 
-  // Shake detection (DeviceMotion). Listen across all phases for replay.
+  // Shake detection (DeviceMotion). Attached once when motion permission is
+  // granted and kept stable for the whole session — re-attaching on every
+  // phase change resets firstReading and swallows the next motion sample.
+  const onActionRef = useRef(onAction);
+  useEffect(() => { onActionRef.current = onAction; }, [onAction]);
   useEffect(() => {
     if (!motionGranted) return;
     let lastShake = 0;
@@ -144,12 +148,12 @@ function IslandApp() {
       lastX = x; lastY = y; lastZ = z;
       if (speed > 22 && now - lastShake > 1200) {
         lastShake = now;
-        onAction();
+        onActionRef.current();
       }
     };
     window.addEventListener("devicemotion", onMotion);
     return () => window.removeEventListener("devicemotion", onMotion);
-  }, [onAction, motionGranted]);
+  }, [motionGranted]);
 
   // Auto-sweep tweak (for desktop demo without shaking)
   useEffect(() => {
