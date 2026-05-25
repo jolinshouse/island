@@ -1,0 +1,698 @@
+/* Island — main styles */
+:root {
+  --bg-deep: #0e1530;
+  --bg-mid: #1a2440;
+  --ink: #eef2ff;
+  --ink-soft: rgba(238, 242, 255, 0.72);
+  --ink-faint: rgba(238, 242, 255, 0.45);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #07080d; overflow: hidden; -webkit-font-smoothing: antialiased; font-family: "Quicksand", system-ui, sans-serif; color: var(--ink); }
+img { user-select: none; -webkit-user-drag: none; }
+button { font-family: inherit; }
+
+/* ─── App shell ──────────────────────────────────────────── */
+.island-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #060a1f 100%);
+  isolation: isolate;
+}
+
+.screen-wrap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 80px 22px 56px;
+  min-height: 0;
+  overflow: hidden;
+  row-gap: 8px;
+}
+
+/* ─── Ambience ────────────────────────────────────────────── */
+.ambience { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.amb-scene { position: absolute; inset: 0; overflow: hidden; animation: amb-fade 700ms ease both; }
+@keyframes amb-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.amb-grain {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='220' height='220' filter='url(%23n)' opacity='0.6'/></svg>");
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  animation: grain 1.4s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-2%, 1%); }
+  40% { transform: translate(1%, -1%); }
+  60% { transform: translate(-1%, 2%); }
+  80% { transform: translate(2%, -2%); }
+  100% { transform: translate(0,0); }
+}
+
+/* ────── Soft — cool blue morning ambience ────── */
+.amb-soft .soft-sky {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 80% at 65% -10%, #d6ebff 0%, #a8cbef 22%, #7aa9d8 45%, transparent 70%),
+    linear-gradient(180deg, #cfe5fa 0%, #9fbfe2 32%, #6e94c0 60%, #4a6f9c 85%, #2c4b73 100%);
+}
+.amb-soft .soft-warm-sweep {
+  position: absolute; inset: -10%;
+  background:
+    radial-gradient(60% 45% at 30% 30%, rgba(220, 235, 255, 0.6) 0%, transparent 70%),
+    radial-gradient(70% 50% at 80% 70%, rgba(180, 210, 240, 0.55) 0%, transparent 70%),
+    radial-gradient(50% 40% at 50% 100%, rgba(140, 180, 220, 0.45) 0%, transparent 70%);
+  filter: blur(20px);
+  animation: soft-sweep 18s ease-in-out infinite alternate;
+}
+@keyframes soft-sweep {
+  0%   { transform: translate(-4%, -2%) scale(1.05); }
+  50%  { transform: translate(4%, 3%) scale(1.12); }
+  100% { transform: translate(-2%, 4%) scale(1.05); }
+}
+.amb-soft .soft-beams {
+  position: absolute; inset: -15% -10% -10%; pointer-events: none;
+  mix-blend-mode: screen;
+}
+.amb-soft .soft-beam {
+  position: absolute;
+  top: -20%;
+  height: 160%;
+  background: linear-gradient(to bottom, rgba(225, 240, 255, 0) 0%, rgba(220, 235, 255, 0.55) 30%, rgba(200, 225, 250, 0.6) 55%, rgba(225, 240, 255, 0) 100%);
+  filter: blur(14px);
+  opacity: calc(0.55 * var(--amb-intensity, 1));
+  transform-origin: top center;
+  animation: soft-beam-drift linear infinite;
+}
+@keyframes soft-beam-drift {
+  0%   { transform: translateX(-30px) rotate(-22deg); opacity: 0; }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.5; }
+  100% { transform: translateX(60px) rotate(-22deg); opacity: 0; }
+}
+.amb-soft .soft-haze {
+  position: absolute; inset: 0;
+  background: radial-gradient(80% 60% at 50% 100%, rgba(160, 200, 235, 0.4) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: soft-haze 12s ease-in-out infinite alternate;
+}
+@keyframes soft-haze {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+.amb-grain-soft { opacity: 0.10; mix-blend-mode: soft-light; }
+
+/* Soft sparkle stars */
+.amb-soft .soft-stars { position: absolute; inset: 0; pointer-events: none; opacity: var(--amb-intensity, 1); }
+.amb-soft .soft-star {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, rgba(255, 255, 255, 0.85) 40%, rgba(255, 255, 255, 0) 70%);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 12px rgba(220, 235, 255, 0.7));
+  animation: star-twinkle ease-in-out infinite alternate;
+  will-change: opacity, transform;
+}
+.amb-soft .soft-star::before,
+.amb-soft .soft-star::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.9) 50%, transparent 100%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.amb-soft .soft-star::before {
+  width: 380%; height: 1px;
+  filter: blur(0.4px);
+}
+.amb-soft .soft-star::after {
+  width: 1px; height: 380%;
+  filter: blur(0.4px);
+}
+.amb-soft .soft-star--warm { background: radial-gradient(circle, #fff7e0 0%, rgba(255, 230, 180, 0.85) 40%, rgba(255, 230, 180, 0) 70%); }
+@keyframes star-twinkle {
+  0%   { opacity: 0.15; transform: scale(0.6); }
+  100% { opacity: 1;    transform: scale(1.2); }
+}
+
+/* ────── Delulu — strong wind / storm ────── */
+.amb-delulu .delulu-sky {
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 80% at 30% -10%, #5d6f8a 0%, #3b4a66 30%, #243049 60%, #141a2c 100%);
+}
+.amb-delulu .delulu-clouds {
+  position: absolute;
+  left: -30%; right: -30%;
+  height: 140%;
+  top: -20%;
+  background-repeat: repeat-x;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  filter: blur(14px);
+}
+.amb-delulu .delulu-clouds-back {
+  background-image: radial-gradient(60% 35% at 20% 30%, rgba(190, 200, 230, 0.55) 0%, transparent 60%),
+                    radial-gradient(55% 30% at 60% 40%, rgba(170, 185, 220, 0.5) 0%, transparent 60%),
+                    radial-gradient(45% 28% at 90% 25%, rgba(200, 210, 235, 0.45) 0%, transparent 60%);
+  background-size: 80% 50%;
+  animation: delulu-cloud-slow 26s linear infinite;
+  opacity: 0.55;
+  filter: blur(28px);
+}
+.amb-delulu .delulu-clouds-mid {
+  background-image: radial-gradient(40% 25% at 25% 40%, rgba(220, 225, 240, 0.6) 0%, transparent 60%),
+                    radial-gradient(50% 30% at 70% 35%, rgba(200, 210, 235, 0.55) 0%, transparent 60%);
+  background-size: 55% 40%;
+  animation: delulu-cloud-mid 11s linear infinite;
+  opacity: 0.7;
+  filter: blur(16px);
+}
+.amb-delulu .delulu-clouds-fore {
+  background-image: radial-gradient(35% 22% at 30% 60%, rgba(150, 160, 195, 0.7) 0%, transparent 60%),
+                    radial-gradient(40% 28% at 75% 50%, rgba(130, 145, 185, 0.7) 0%, transparent 60%);
+  background-size: 42% 35%;
+  animation: delulu-cloud-fast 5.5s linear infinite;
+  opacity: 0.9;
+  filter: blur(8px);
+}
+@keyframes delulu-cloud-slow { from { transform: translateX(0%); } to { transform: translateX(-25%); } }
+@keyframes delulu-cloud-mid  { from { transform: translateX(0%); } to { transform: translateX(-50%); } }
+@keyframes delulu-cloud-fast { from { transform: translateX(0%); } to { transform: translateX(-100%); } }
+
+/* Delulu — retro warped-stripe swirl */
+.amb-delulu .delulu-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.amb-delulu .delulu-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(140% 100% at 50% 0%, #0e1734 0%, #08102a 35%, #03061a 75%, #010208 100%);
+}
+.amb-delulu .delulu-swirl {
+  position: absolute;
+  inset: -25%;
+  background:
+    repeating-linear-gradient(
+      6deg,
+      #2c4373 0px,
+      #2c4373 18px,
+      #112349 18px,
+      #112349 44px,
+      #050d28 44px,
+      #050d28 68px,
+      #0c1a3c 68px,
+      #0c1a3c 94px
+    );
+  filter: url(#delulu-warp);
+  opacity: 0.95;
+  animation: delulu-swirl-drift 36s linear infinite;
+  will-change: background-position;
+}
+@keyframes delulu-swirl-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -224px; }
+}
+.amb-delulu .delulu-glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 50% at 50% 35%, rgba(60, 100, 180, 0.10) 0%, transparent 70%),
+    radial-gradient(80% 60% at 50% 100%, rgba(15, 30, 80, 0.32) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.amb-delulu .delulu-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* ────── Unhinged — heavy rain + lightning ────── */
+.amb-unhinged .unhinged-sky {
+  position: absolute; inset: 0;
+  background: radial-gradient(100% 60% at 50% 0%, #2a2e4a 0%, #181b30 35%, #0a0c18 75%, #06070f 100%);
+}
+.amb-unhinged .unhinged-clouds {
+  position: absolute; inset: -15% -25% 60%;
+  background:
+    radial-gradient(50% 60% at 20% 80%, rgba(40, 45, 70, 0.95) 0%, transparent 70%),
+    radial-gradient(60% 70% at 60% 60%, rgba(30, 35, 55, 0.95) 0%, transparent 70%),
+    radial-gradient(50% 60% at 90% 80%, rgba(45, 50, 75, 0.95) 0%, transparent 70%);
+  filter: blur(18px);
+  animation: unhinged-clouds 16s ease-in-out infinite alternate;
+}
+@keyframes unhinged-clouds {
+  0%   { transform: translate(-3%, 0) scale(1.05); }
+  100% { transform: translate(3%, 1%) scale(1.1); }
+}
+.amb-unhinged .unhinged-rain {
+  position: absolute; inset: -10% 0 -5%;
+  pointer-events: none;
+  opacity: var(--amb-intensity, 1);
+}
+.amb-unhinged .rain-drop {
+  position: absolute;
+  top: -10%;
+  width: 1.5px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(190, 210, 240, 0.55) 30%, rgba(220, 235, 255, 0.85) 100%);
+  border-radius: 1px;
+  transform: translateY(0) rotate(8deg);
+  animation: rain-fall linear infinite;
+  will-change: transform;
+  filter: blur(0.3px);
+}
+@keyframes rain-fall {
+  0%   { transform: translateY(-15%) rotate(8deg); }
+  100% { transform: translateY(125vh) rotate(8deg); }
+}
+.amb-unhinged .unhinged-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 100% at 50% 30%, transparent 40%, rgba(0, 0, 0, 0.65) 100%);
+  pointer-events: none;
+}
+.amb-unhinged .unhinged-flash {
+  position: absolute; inset: 0;
+  background: radial-gradient(80% 60% at 50% 30%, rgba(220, 230, 255, 0.95) 0%, rgba(180, 200, 240, 0.5) 30%, transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+.amb-unhinged .unhinged-flash.is-on {
+  animation: lightning-flash 520ms steps(1, end);
+}
+@keyframes lightning-flash {
+  0%   { opacity: 0; }
+  4%   { opacity: 1; }
+  9%   { opacity: 0.2; }
+  14%  { opacity: 0.95; }
+  22%  { opacity: 0.3; }
+  40%  { opacity: 0.7; }
+  60%  { opacity: 0.15; }
+  100% { opacity: 0; }
+}
+.amb-unhinged .unhinged-bolt {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(220, 235, 255, 0.95)) drop-shadow(0 0 18px rgba(150, 190, 255, 0.7));
+  mix-blend-mode: screen;
+}
+.amb-unhinged .unhinged-bolt.is-on {
+  animation: bolt-show 420ms ease-out;
+}
+@keyframes bolt-show {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  35%  { opacity: 0.4; }
+  50%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── Top bar ─────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 2px 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  filter: drop-shadow(0 2px 18px rgba(180, 210, 240, 0.55));
+}
+.brand-logo {
+  height: 64px;
+  width: auto;
+  display: block;
+  pointer-events: none;
+}
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.level-pill:hover { background: rgba(255, 255, 255, 0.11); }
+.level-pill:active { transform: scale(0.96); }
+.level-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* ─── Stage ───────────────────────────────────────────────── */
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+
+.card-stage {
+  position: relative;
+  width: 86%;
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: 5 / 7;
+  transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+}
+
+/* ─── Card shell ──────────────────────────────────────────── */
+.card-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  container-type: inline-size;
+  transform-style: preserve-3d;
+  will-change: transform, filter;
+  animation: card-idle-float 5s ease-in-out infinite;
+}
+
+/* Glow halo behind card */
+.card-glow {
+  position: absolute;
+  inset: -22%;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at center, var(--glow-color, rgba(170, 215, 240, 0.7)) 0%, transparent 65%);
+  filter: blur(20px);
+  opacity: 0.55;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.card-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--flip-dur, 1000ms) cubic-bezier(0.34, 1.32, 0.5, 1);
+}
+
+.card-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform var(--flip-dur, 1000ms) cubic-bezier(0.34, 1.32, 0.5, 1);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 30px 60px -20px rgba(0, 5, 20, 0.7),
+    0 10px 30px -10px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+.card-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+.card-front { transform: rotateY(0deg); }
+.card-back { transform: rotateY(180deg); }
+
+/* Face opacity is driven by React inline styles based on phase + swap timing.
+   No CSS opacity overrides here — they fought with the inline values. */
+
+/* Shine layers */
+.card-front-shine, .card-back-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  background-size: 250% 250%;
+  background-position: 200% 200%;
+  opacity: 0;
+  mix-blend-mode: overlay;
+}
+
+/* Prompt overlay — lives OUTSIDE the 3D rotating container so its animations
+   don't get stalled by the parent's 3D transform context. Positioned over
+   the card by matching the card-3d's bounds. */
+.card-prompt-zone {
+  position: absolute;
+  inset: 8% 9%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.97);
+  transition: opacity 380ms ease 80ms, transform 460ms cubic-bezier(0.2, 1.4, 0.4, 1) 80ms;
+  z-index: 2;
+}
+.card-prompt-zone.is-on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.card-prompt {
+  margin: 0;
+  text-align: center;
+  line-height: 1.25;
+  font-weight: 400;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+/* ─── PHASES ─────────────────────────────────────────────── */
+
+/* idle — slight float, front face */
+.card-shell.phase-idle .card-3d { transform: rotateY(0deg) rotateZ(0deg); }
+
+/* reveal — lift + flip */
+.card-shell.phase-reveal { animation: card-lift var(--flip-dur, 1000ms) cubic-bezier(0.3, 0.9, 0.3, 1.1) forwards; }
+.card-shell.phase-reveal .card-3d {
+  transform: rotateY(180deg) rotateZ(var(--rotZ, 4deg));
+  filter: blur(var(--motion-blur, 8px));
+  animation: card-flip-blur var(--flip-dur, 1000ms) ease-in-out forwards;
+}
+.card-shell.phase-reveal .card-glow {
+  animation: glow-flash var(--flip-dur, 1000ms) ease-out forwards;
+}
+.card-shell.phase-reveal .card-front-shine,
+.card-shell.phase-reveal .card-back-shine {
+  animation: shine-sweep calc(var(--flip-dur, 1000ms) * 0.85) ease-out forwards;
+}
+
+/* revealed — back face, prompt visible (faces driven by React inline) */
+.card-shell.phase-revealed { animation: card-idle-float-soft 5s ease-in-out infinite; }
+.card-shell.phase-revealed .card-3d { transform: rotateY(180deg) rotateZ(0deg); }
+
+/* exit — spin out + drop down */
+.card-shell.phase-exit { animation: card-exit 460ms cubic-bezier(0.5, 0, 0.7, 0.4) forwards; }
+.card-shell.phase-exit .card-3d { transform: rotateY(360deg) rotateZ(-12deg); transition: transform 460ms ease-in; }
+
+/* deal — fly in from above with bounce, front showing */
+.card-shell.phase-deal { animation: card-deal 700ms cubic-bezier(0.32, 1.55, 0.5, 1) forwards; }
+.card-shell.phase-deal .card-3d { transform: rotateY(0deg) rotateZ(0deg); }
+
+/* ─── Keyframes ───────────────────────────────────────────── */
+@keyframes card-idle-float {
+  0%, 100% { transform: translateY(0px) rotate(0.2deg); }
+  50% { transform: translateY(-7px) rotate(-0.2deg); }
+}
+@keyframes card-idle-float-soft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes card-lift {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(calc(var(--lift, 30px) * -1)) scale(1.06); }
+  70% { transform: translateY(calc(var(--lift, 30px) * -0.4)) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes card-flip-blur {
+  0% { filter: blur(0px); }
+  35% { filter: blur(var(--motion-blur, 8px)); }
+  60% { filter: blur(calc(var(--motion-blur, 8px) * 0.6)); }
+  100% { filter: blur(0px); }
+}
+
+@keyframes glow-flash {
+  0% { opacity: 0.5; filter: blur(20px); }
+  35% { opacity: 1.0; filter: blur(36px); transform: scale(1.18); }
+  70% { opacity: 0.85; filter: blur(28px); transform: scale(1.08); }
+  100% { opacity: 0.55; filter: blur(20px); transform: scale(1); }
+}
+
+@keyframes shine-sweep {
+  0% { opacity: 0; background-position: 200% 200%; }
+  40% { opacity: 0.9; }
+  100% { opacity: 0; background-position: -100% -100%; }
+}
+
+@keyframes prompt-rise {
+  0% { opacity: 0; transform: translateY(10px); }
+  55% { opacity: 0; transform: translateY(10px); }
+  85% { opacity: 0.85; transform: translateY(2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-exit {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(80vh) scale(0.7); opacity: 0; }
+}
+
+@keyframes card-deal {
+  0% { transform: translateY(-80vh) rotate(-22deg) scale(0.78); opacity: 0; filter: blur(6px); }
+  55% { transform: translateY(8px) rotate(2deg) scale(1.04); opacity: 1; filter: blur(0); }
+  80% { transform: translateY(-4px) rotate(-1deg) scale(1.0); }
+  100% { transform: translateY(0) rotate(0) scale(1); }
+}
+
+/* ─── Hint ───────────────────────────────────────────────── */
+.hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-top: 4px;
+}
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink-soft);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: hint-pulse 2.4s ease-in-out infinite;
+}
+.hint-reveal, .hint-exit, .hint-deal { opacity: 0; transition: opacity 0.2s ease; }
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+.hint svg { color: currentColor; }
+
+/* ─── Bottom bar ─────────────────────────────────────────── */
+.bottombar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+.tagline {
+  font-family: "Italianno", serif;
+  font-size: 22px;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+  font-style: italic;
+  white-space: nowrap;
+}
+.level-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+.level-chip {
+  flex: 1;
+  max-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  transition: all 0.25s ease;
+}
+.level-chip:hover { background: rgba(255, 255, 255, 0.08); }
+.level-chip.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.04), 0 6px 20px -6px var(--glow);
+}
+.chip-num {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  font-weight: 700;
+  opacity: 0.55;
+  font-feature-settings: "tnum";
+}
+.chip-name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.level-chip.crazy-1.active .chip-num { color: #aed3ed; }
+.level-chip.crazy-2.active .chip-num { color: #6fa3d6; }
+.level-chip.crazy-3.active .chip-num { color: #8c9fff; }
+
+/* ─── Reveal flash ───────────────────────────────────────── */
+.reveal-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center 45%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+  opacity: 0;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+.reveal-flash.phase-reveal { animation: reveal-flash 1100ms ease-out forwards; }
+@keyframes reveal-flash {
+  0% { opacity: 0; }
+  25% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* ─── Small screens / device frame fitting ─────────────── */
+@media (max-width: 430px) {
+  .brand-logo { height: 56px; }
+}
