@@ -82,14 +82,36 @@ function IslandApp() {
     }, 460);
   }, [hap]);
 
+  // iOS 13+ requires explicit permission for DeviceMotionEvent, gated behind
+  // a user gesture. Other platforms expose motion without a prompt.
+  const [motionGranted, setMotionGranted] = useState(false);
+  useEffect(() => {
+    const needsPermission = typeof DeviceMotionEvent !== "undefined" &&
+      typeof DeviceMotionEvent.requestPermission === "function";
+    if (!needsPermission) setMotionGranted(true);
+  }, []);
+  const requestMotionPermission = useCallback(async () => {
+    if (motionGranted) return;
+    if (typeof DeviceMotionEvent === "undefined") return;
+    if (typeof DeviceMotionEvent.requestPermission !== "function") {
+      setMotionGranted(true);
+      return;
+    }
+    try {
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res === "granted") setMotionGranted(true);
+    } catch (_) {}
+  }, [motionGranted]);
+
   // Universal action: shake or tap
   // idle    → reveal current card
   // revealed → deal a new random card
   const onAction = useCallback(() => {
+    requestMotionPermission();
     if (busyRef.current) return;
     if (phase === "idle") reveal();
     else if (phase === "revealed") dealNext();
-  }, [phase, reveal, dealNext]);
+  }, [phase, reveal, dealNext, requestMotionPermission]);
 
   // Tap / click / space
   useEffect(() => {
@@ -105,6 +127,7 @@ function IslandApp() {
 
   // Shake detection (DeviceMotion). Listen across all phases for replay.
   useEffect(() => {
+    if (!motionGranted) return;
     let lastShake = 0;
     let lastX = 0, lastY = 0, lastZ = 0;
     let lastT = Date.now();
@@ -126,7 +149,7 @@ function IslandApp() {
     };
     window.addEventListener("devicemotion", onMotion);
     return () => window.removeEventListener("devicemotion", onMotion);
-  }, [onAction]);
+  }, [onAction, motionGranted]);
 
   // Auto-sweep tweak (for desktop demo without shaking)
   useEffect(() => {
