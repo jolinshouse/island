@@ -29,7 +29,11 @@ button { font-family: inherit; }
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding: 80px 22px 56px;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 32px)
+    calc(env(safe-area-inset-right, 0px) + 22px)
+    calc(env(safe-area-inset-bottom, 0px) + 32px)
+    calc(env(safe-area-inset-left, 0px) + 22px);
   min-height: 0;
   overflow: hidden;
   row-gap: 8px;

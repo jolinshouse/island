@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <title>Island — Shake to Reveal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Italianno&family=Sacramento&family=Petit+Formal+Script&family=Marck+Script&family=Caveat:wght@400;600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <style>
-  html, body { width: 100%; height: 100%; background: radial-gradient(ellipse at center, #1a2238 0%, #06070d 100%); display: flex; align-items: center; justify-content: center; }
-  #frame-root { display: flex; align-items: center; justify-content: center; padding: 24px; width: 100%; height: 100%; }
-  /* Inside-device root */
-  #app-root { width: 100%; height: 100%; }
+  html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: #07080d; overflow: hidden; }
+  #frame-root { width: 100vw; height: 100vh; height: 100dvh; }
 </style>
 </head>
 <body>
@@ -28,7 +28,6 @@
 <script src="data.js"></script>
 
 <!-- Component scripts (JSX) -->
-<script type="text/babel" src="ios-frame.jsx"></script>
 <script type="text/babel" src="tweaks-panel.jsx"></script>
 <script type="text/babel" src="ambience.jsx"></script>
 <script type="text/babel" src="card.jsx"></script>
@@ -36,36 +35,8 @@
 
 <!-- Boot -->
 <script type="text/babel">
-  const { useEffect, useState } = React;
-
-  function Root() {
-    // Fit the iOS frame to viewport
-    const [size, setSize] = useState({ w: 390, h: 844 });
-    useEffect(() => {
-      const fit = () => {
-        const pad = 40;
-        const vw = window.innerWidth - pad;
-        const vh = window.innerHeight - pad;
-        const ratio = 390 / 844;
-        let h = vh;
-        let w = h * ratio;
-        if (w > vw) { w = vw; h = w / ratio; }
-        setSize({ w: Math.round(w), h: Math.round(h) });
-      };
-      fit();
-      window.addEventListener("resize", fit);
-      return () => window.removeEventListener("resize", fit);
-    }, []);
-
-    return (
-      <window.IOSDevice width={size.w} height={size.h} dark={true}>
-        <window.IslandApp />
-      </window.IOSDevice>
-    );
-  }
-
   const root = ReactDOM.createRoot(document.getElementById("frame-root"));
-  root.render(<Root />);
+  root.render(<window.IslandApp />);
 </script>
 
 </body>
